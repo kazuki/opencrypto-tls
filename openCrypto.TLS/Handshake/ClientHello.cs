@@ -12,6 +12,11 @@ namespace openCrypto.TLS.Handshake
 		CompressionMethod[] _compressions;
 		Extension[] _extensions;
 
+		private ClientHello (ProtocolVersion ver) : base (HandshakeType.ClientHello)
+		{
+			_version = ver;
+		}
+
 		public ClientHello (byte[] buffer, int offset, uint length) : base (HandshakeType.ClientHello)
 		{
 			int idx = offset, end = (int)(offset + length);
@@ -50,6 +55,30 @@ namespace openCrypto.TLS.Handshake
 			} else {
 				_extensions = Utility.EmptyExtensionArray;
 			}
+		}
+
+		public static ClientHello CreateFromSSL2CompatibleData (ProtocolVersion ver, byte[] buffer, int offset, uint length)
+		{
+			ClientHello msg = new ClientHello (ver);
+
+			int cipherLen = BitConverterBE.ReadUInt16AndMoveOffset (buffer, ref offset) / 3;
+			ushort sessionIdLen = BitConverterBE.ReadUInt16AndMoveOffset (buffer, ref offset);
+			if (sessionIdLen != 0 && sessionIdLen != 16)
+				throw new Exception ();
+			ushort challengeLen = BitConverterBE.ReadUInt16AndMoveOffset (buffer, ref offset);
+			if (challengeLen < 16)
+				throw new Exception ();
+			if (challengeLen > RandomData.Size)
+				challengeLen =	RandomData.Size;
+			msg._cipherSuites = new CipherSuite[cipherLen];
+			for (int i = 0; i < cipherLen; i ++)
+				msg._cipherSuites[i] = (CipherSuite)BitConverterBE.ReadUInt24AndMoveOffset (buffer, ref offset);
+			msg._sessionId = new byte[sessionIdLen];
+			Buffer.BlockCopy (buffer, offset, msg._sessionId, 0, sessionIdLen);
+			offset += sessionIdLen;
+			msg._random = new byte[challengeLen];
+			Buffer.BlockCopy (buffer, offset, msg._random, 0, challengeLen);
+			return msg;
 		}
 
 		public override ushort Write (byte[] buffer, int offset)

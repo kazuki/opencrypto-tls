@@ -66,10 +66,12 @@ namespace openCrypto.TLS
 			ClientHello clientHello = _recordLayer.Read () as ClientHello;
 			if (clientHello == null)
 				throw new Exception ();
-			Console.WriteLine ("CipherSuites");
+			Console.WriteLine ("[TLSServer] Receive ClientHello Version: {0}", clientHello.Version);
+			Console.WriteLine ("[TLSServer] CipherSuites");
 			for (int i = 0; i < clientHello.CipherSuites.Length; i ++)
 				Console.WriteLine ("  {0}", clientHello.CipherSuites[i]);
 			CipherSuite selected = _selector.Select (clientHello.CipherSuites);
+			Console.WriteLine ("[TLSServer] CipherSuite Selected. {0}", selected);
 			if (selected == CipherSuite.NONE) {
 				// Alertを送るべき？
 				throw new Exception ();
@@ -77,8 +79,6 @@ namespace openCrypto.TLS
 			_sparams.SetCipherSuite (selected, _signAlgo);
 			_sparams.ClientRandom = clientHello.Random;
 			_recordLayer.ProtocolVersion = clientHello.Version;
-			Console.WriteLine ("[TLSServer] Accept ClientHello Version: {0}", clientHello.Version);
-			Console.WriteLine ("[TLSServer] CipherSuite Selected. {0}", selected);
 
 			byte[] serverRandom = new byte[RandomData.Size];
 			Extension[] serverExtensions = new Extension[] {new Extension (ExtensionType.EcPointFormats, new byte[] {1, 0})};

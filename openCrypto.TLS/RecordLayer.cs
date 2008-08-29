@@ -38,8 +38,19 @@ namespace openCrypto.TLS
 		{
 			ReadComplete (_headerBuffer, 0, _headerBuffer.Length);
 			ContentType type = (ContentType)_headerBuffer[0];
-			ProtocolVersion ver = (ProtocolVersion)BitConverterBE.ReadUInt16 (_headerBuffer, 1);
-			ushort length = BitConverterBE.ReadUInt16 (_headerBuffer, 3);
+			ProtocolVersion ver;
+			ushort length;
+			if (type == ContentType.SSL20Compatible) {
+				_handshakePackets.Add (new byte[] {_headerBuffer[2], _headerBuffer[3], _headerBuffer[4]});
+				
+				length = (ushort)(_headerBuffer[1] - 3);
+				if (_headerBuffer[2] != 1)
+					throw new Exception ();
+				ver = (ProtocolVersion)BitConverterBE.ReadUInt16 (_headerBuffer, 3);
+			} else {
+				ver = (ProtocolVersion)BitConverterBE.ReadUInt16 (_headerBuffer, 1);
+				length = BitConverterBE.ReadUInt16 (_headerBuffer, 3);
+			}
 			if (ver != ProtocolVersion.SSL30 && ver != ProtocolVersion.TLS10 && ver != ProtocolVersion.TLS11 && ver != ProtocolVersion.TLS12) {
 				System.Diagnostics.Debug.WriteLine (string.Format ("[RecordLayer] Unknown Version {0:x4}", (ushort)ver), DEBUG_CATEGORY);
 				throw new Exception ();
@@ -47,6 +58,14 @@ namespace openCrypto.TLS
 			if (length > MaxFragmentSize)
 				throw new Exception ();
 			ReadComplete (_recvBuffer, 0, length);
+
+			// SSL2.0互換ClientHelloのみ例外的な処理
+			if (type == ContentType.SSL20Compatible) {
+				byte[] tmp = new byte[length];
+				Buffer.BlockCopy (_recvBuffer, 0, tmp, 0, length);
+				_handshakePackets.Add (tmp);
+				return Handshake.ClientHello.CreateFromSSL2CompatibleData (ver, _recvBuffer, 0, length);
+			}
 
 			if (_recordType == RecordState.PlainText || _recordType == RecordState.CipherTextSendOnly)
 				return ReadPlainText (type, ver, 0, length);

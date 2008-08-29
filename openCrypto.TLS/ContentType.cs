@@ -6,5 +6,6 @@
 		Alert = 21,
 		Handshake = 22,
 		ApplicationData = 23,
+		SSL20Compatible = 0x80
 	}
 }
