@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openCrypto.TLS", "openCrypto.TLS\openCrypto.TLS.csproj", "{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openCrypto.NET", "..\openCrypto.NET\openCrypto.NET\openCrypto.NET.csproj", "{59AD989B-7DD7-400B-B2D5-EFBD0004A749}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Tests|Any CPU = Tests|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Tests|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}.Tests|Any CPU.Build.0 = Release|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
+		{59AD989B-7DD7-400B-B2D5-EFBD0004A749}.Tests|Any CPU.Build.0 = Tests|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
