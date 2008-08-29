@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openCrypto.TLS", "openCrypto.TLS\openCrypto.TLS.csproj", "{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openCrypto.NET", "..\openCrypto.NET\openCrypto.NET\openCrypto.NET.csproj", "{59AD989B-7DD7-400B-B2D5-EFBD0004A749}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openCrypto.NET", "openCrypto.NET\openCrypto.NET.csproj", "{59AD989B-7DD7-400B-B2D5-EFBD0004A749}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
