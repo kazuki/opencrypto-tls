@@ -33,7 +33,7 @@ namespace openCrypto.TLS.Handshake
 			idx += _sessionID.Length;
 			idx += BitConverterBE.WriteUInt16 ((ushort)_cipherSuite, buffer, idx);
 			buffer[idx ++] = (byte)_compression;
-			if (_extensions != null && _extensions.Length > 0) {
+			if (_version >= ProtocolVersion.TLS10 && _extensions != null && _extensions.Length > 0) {
 				int idx_backup = idx;
 
 				// Skip

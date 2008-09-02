@@ -76,7 +76,7 @@ namespace openCrypto.TLS.Handshake
 			msg._sessionId = new byte[sessionIdLen];
 			Buffer.BlockCopy (buffer, offset, msg._sessionId, 0, sessionIdLen);
 			offset += sessionIdLen;
-			msg._random = new byte[challengeLen];
+			msg._random = new byte[RandomData.Size];
 			Buffer.BlockCopy (buffer, offset, msg._random, 0, challengeLen);
 			return msg;
 		}

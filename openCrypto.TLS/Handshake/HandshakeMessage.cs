@@ -15,7 +15,7 @@ namespace openCrypto.TLS.Handshake
 			_length = 0;
 		}
 
-		public static HandshakeMessage Create (HandshakeType type, byte[] buffer, int offset, uint length)
+		public static HandshakeMessage Create (ProtocolVersion ver, HandshakeType type, byte[] buffer, int offset, uint length)
 		{
 			Console.WriteLine ("[Handshake] Type:{0}, Size:{1}", type, length);
 			switch (type) {
@@ -24,7 +24,7 @@ namespace openCrypto.TLS.Handshake
 				case HandshakeType.ClientKeyExchange:
 					return new ClientKeyExchange (buffer, offset, length);
 				case HandshakeType.Finished:
-					return new Finished (buffer, offset, length);
+					return new Finished (ver, buffer, offset, length);
 				default:
 					Console.WriteLine ("\tNot implemented type");
 					return null;

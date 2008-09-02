@@ -76,7 +76,7 @@ namespace openCrypto.TLS.PRF
 			_sha1.TransformBlock (buffer, offset, length, buffer, offset);
 		}
 
-		public void HandshakeHashTransformFinished ()
+		public void HandshakeHashTransformFinished (bool senderIsServer)
 		{
 			_md5.TransformFinalBlock (Utility.EmptyByteArray, 0, 0);
 			_sha1.TransformFinalBlock (Utility.EmptyByteArray, 0, 0);

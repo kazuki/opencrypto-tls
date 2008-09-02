@@ -76,6 +76,7 @@ namespace openCrypto.TLS
 				// Alertを送るべき？
 				throw new Exception ();
 			}
+			_sparams.SetVersion (clientHello.Version);
 			_sparams.SetCipherSuite (selected, _signAlgo);
 			_sparams.ClientRandom = clientHello.Random;
 			_recordLayer.ProtocolVersion = clientHello.Version;
@@ -111,18 +112,18 @@ namespace openCrypto.TLS
 			Console.WriteLine ("VerifyData");
 			Utility.Dump (finished.VerifyData);
 			Console.WriteLine ("Computed VerifyData");
-			byte[] verifyData = _sparams.PRF.Compute (12, _sparams.MasterSecret, "client finished", new byte[][]{_sparams.PRF.GetHandshakeHash ()});
+			byte[] verifyData = _sparams.ComputeFinishedVerifyData (false);
 			Utility.Dump (verifyData);
 			if (!Utility.Equals (finished.VerifyData, 0, verifyData, 0, verifyData.Length))
 				throw new Exception ();
 
 			_recordLayer.Write (ContentType.ChangeCipherSpec, new ChangeCipherSpec ());
 			_recordLayer.EnableSendCipher (_sparams.CreateServerEncryptor (), _sparams.CreateServerWriteHMAC ());
-			_recordLayer.ComputeHandshakeHash ();
-			verifyData = _sparams.PRF.Compute (12, _sparams.MasterSecret, "server finished", new byte[][] {_sparams.PRF.GetHandshakeHash ()});
+			_recordLayer.ComputeHandshakeHash (true);
+			verifyData = _sparams.ComputeFinishedVerifyData (true);
 			Console.WriteLine ("Finished VerifyData");
 			Utility.Dump (verifyData);
-			finished = new Finished (verifyData);
+			finished = new Finished (_recordLayer.ProtocolVersion, verifyData);
 			_recordLayer.Write (finished);
 		}
 		#endregion

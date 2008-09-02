@@ -14,7 +14,7 @@ namespace openCrypto.TLS.KeyExchange
 		/// ServerKeyExchangeの署名を指定された引数の情報より生成して、バッファにコピーする
 		/// </summary>
 		/// <returns>署名のバイト数</returns>
-		int CreateServerKeyExchangeSign (SecurityParameters sparams, byte[] params_buffer, int params_offset, int length, byte[] sign_buffer, int sign_offset);
+		int CreateServerKeyExchangeSign (SecurityParameters sparams, byte[] params_buffer, int params_offset, int params_length, byte[] sign_buffer, int sign_offset);
 
 		/// <summary>
 		/// ClientKeyExchangeよりサーバ側のMasterSecretを求め、SecurityParametersに設定します

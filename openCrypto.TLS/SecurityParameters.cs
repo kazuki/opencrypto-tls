@@ -8,6 +8,7 @@ namespace openCrypto.TLS
 	class SecurityParameters
 	{
 		#region Variables
+		ProtocolVersion _ver = ProtocolVersion.TLS10;
 		PRFAlgorithm _prfType = PRFAlgorithm.MD5_AND_SHA1;
 		BulkCipherAlgorithm _bulk_cipher;
 		CipherType _cipherType;
@@ -41,6 +42,23 @@ namespace openCrypto.TLS
 		#endregion
 
 		#region Methods
+		public void SetVersion (ProtocolVersion version)
+		{
+			_ver = version;
+			switch (version) {
+				case ProtocolVersion.SSL30:
+					_prfType = PRFAlgorithm.SSL3;
+					break;
+				case ProtocolVersion.TLS10:
+				case ProtocolVersion.TLS11:
+					_prfType = PRFAlgorithm.MD5_AND_SHA1;
+					break;
+				case ProtocolVersion.TLS12:
+					_prfType = PRFAlgorithm.SHA256;
+					break;
+			}
+		}
+
 		public void SetCipherSuite (CipherSuite suite, AsymmetricAlgorithm signAlgo)
 		{
 			CipherSuiteInfo info = SupportedCipherSuites.GetSuiteInfo (suite);
@@ -59,11 +77,18 @@ namespace openCrypto.TLS
 			_keyExchange = info.KeyExchangeAlgorithm;
 
 			// TODO: TLS1.2spec ?
-			_prf = new MD5_AND_SHA1 ();
+			switch (_prfType) {
+				case PRFAlgorithm.MD5_AND_SHA1: _prf = new MD5_AND_SHA1 (); break;
+				case PRFAlgorithm.SSL3: _prf = new SSL3_PRF (this); break;
+				default: throw new NotSupportedException ();
+			}
 
 			switch (_keyExchange) {
 				case KeyExchangeAlgorithm.ECDHE_ECDSA:
 					_keyExchanger = new ECDHE_ECDSA ((openCrypto.EllipticCurve.Signature.ECDSA)signAlgo);
+					break;
+				case KeyExchangeAlgorithm.DHE_DSS:
+					_keyExchanger = new DHE_DSS ((DSACryptoServiceProvider)signAlgo);
 					break;
 				default:
 					throw new NotImplementedException ();
@@ -111,6 +136,10 @@ namespace openCrypto.TLS
 
 		public HMAC CreateHMAC (byte[] key)
 		{
+			if (_ver == ProtocolVersion.SSL30) {
+				return new SSL3CompatibleHMAC (_mac, key);
+			}
+
 			switch (_mac) {
 				case MACAlgorithm.HMAC_MD5:
 					return new HMACMD5 (key);
@@ -163,6 +192,15 @@ namespace openCrypto.TLS
 		public ICryptoTransform CreateClientEncryptor ()
 		{
 			return CreateSymmetricAlgorithm ().CreateDecryptor (_client_write_key, _client_write_IV);
+		}
+
+		public byte[] ComputeFinishedVerifyData (bool isServer)
+		{
+			if (_ver == ProtocolVersion.SSL30) {
+				return PRF.GetHandshakeHash ();
+			} else {
+				return PRF.Compute (12, MasterSecret, isServer ? "server finished" : "client finished", new byte[][] {PRF.GetHandshakeHash ()});
+			}
 		}
 		#endregion
 

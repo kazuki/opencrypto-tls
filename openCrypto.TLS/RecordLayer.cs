@@ -67,9 +67,13 @@ namespace openCrypto.TLS
 				return Handshake.ClientHello.CreateFromSSL2CompatibleData (ver, _recvBuffer, 0, length);
 			}
 
+			TLSMessage msg;
 			if (_recordType == RecordState.PlainText || _recordType == RecordState.CipherTextSendOnly)
-				return ReadPlainText (type, ver, 0, length);
-			return ReadCipherText (type, ver, 0, length);
+				msg = ReadPlainText (type, ver, 0, length);
+			else
+				msg = ReadCipherText (type, ver, 0, length);
+			Console.WriteLine ("[RecordLayer] Receive {0}", msg);
+			return msg;
 		}
 
 		TLSMessage ReadPlainText (ContentType type, ProtocolVersion ver, int offset, ushort length)
@@ -78,6 +82,7 @@ namespace openCrypto.TLS
 				case ContentType.Alert:
 					return new Alert ((AlertLevel)_recvBuffer[offset], (AlertDescription)_recvBuffer[offset + 1]);
 				case ContentType.ChangeCipherSpec:
+					_recvSeq = 0;
 					return new ChangeCipherSpec ();
 				case ContentType.Handshake:
 					HandshakeType htype = (HandshakeType)_recvBuffer[offset];
@@ -86,12 +91,12 @@ namespace openCrypto.TLS
 						throw new Exception (); // TODO
 
 					if (htype == HandshakeType.Finished) {
-						ComputeHandshakeHash ();
+						ComputeHandshakeHash (false);
 					}
 					byte[] temp = new byte[length];
 					Buffer.BlockCopy (_recvBuffer, offset, temp, 0, length);
 					_handshakePackets.Add (temp);
-					return Handshake.HandshakeMessage.Create (htype, _recvBuffer, offset + 4, hlength);
+					return Handshake.HandshakeMessage.Create (ver, htype, _recvBuffer, offset + 4, hlength);
 				case ContentType.ApplicationData:
 					return new ApplicationData (_recvBuffer, offset, length);
 				default:
@@ -124,15 +129,23 @@ namespace openCrypto.TLS
 			Console.WriteLine ("HMAC");
 			Utility.Dump (_recvBuffer, fragLen, _sparams.MACLength);
 
-			byte[] temp = new byte[13];
 			_recvHMAC.Initialize ();
-			BitConverterBE.WriteUInt64 (_recvSeq, temp, 0);
-			temp[8] = (byte)type;
-			BitConverterBE.WriteUInt16 ((ushort)ver, temp, 9);
-			BitConverterBE.WriteUInt16 ((ushort)fragLen, temp, 11);
-			_recvHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			if (_ver == ProtocolVersion.SSL30) {
+				byte[] temp = new byte[11];
+				BitConverterBE.WriteUInt64 (_recvSeq, temp, 0);
+				temp[8] = (byte)type;
+				BitConverterBE.WriteUInt16 ((ushort)fragLen, temp, 9);
+				_recvHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			} else {
+				byte[] temp = new byte[13];
+				BitConverterBE.WriteUInt64 (_recvSeq, temp, 0);
+				temp[8] = (byte)type;
+				BitConverterBE.WriteUInt16 ((ushort)ver, temp, 9);
+				BitConverterBE.WriteUInt16 ((ushort)fragLen, temp, 11);
+				_recvHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			}
 			_recvHMAC.TransformBlock (_recvBuffer, 0, fragLen, _recvBuffer, 0);
-			_recvHMAC.TransformFinalBlock (new byte[0], 0, 0);
+			_recvHMAC.TransformFinalBlock (Utility.EmptyByteArray, 0, 0);
 
 			Console.WriteLine ("Comaputed HMAC");
 			Utility.Dump (_recvHMAC.Hash);
@@ -144,6 +157,7 @@ namespace openCrypto.TLS
 
 		public void Write (ContentType type, TLSMessage msg)
 		{
+			Console.WriteLine ("[RecordLayer] {0} {1}", type, msg);
 			_sendBuffer[0] = (byte)type;
 			BitConverterBE.WriteUInt16 ((ushort)_ver, _sendBuffer, 1);
 			ushort size;
@@ -153,6 +167,7 @@ namespace openCrypto.TLS
 				size = WriteCipherMessage (type, msg);
 			BitConverterBE.WriteUInt16 (size, _sendBuffer, 3);
 			_strm.Write (_sendBuffer, 0, size + 5);
+			_strm.Flush ();
 		}
 
 		public void Write (Handshake.HandshakeMessage msg)
@@ -168,15 +183,23 @@ namespace openCrypto.TLS
 			int init_offset = 5;
 			ushort length = WritePlainMessage (type, msg, offset);
 
-			byte[] temp = new byte[13];
 			_sendHMAC.Initialize ();
-			BitConverterBE.WriteUInt64 (_sendSeq, temp, 0);
-			temp[8] = (byte)type;
-			BitConverterBE.WriteUInt16 ((ushort)_ver, temp, 9);
-			BitConverterBE.WriteUInt16 ((ushort)length, temp, 11);
-			_sendHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			if (_ver == ProtocolVersion.SSL30) {
+				byte[] temp = new byte[11];
+				BitConverterBE.WriteUInt64 (_sendSeq, temp, 0);
+				temp[8] = (byte)type;
+				BitConverterBE.WriteUInt16 ((ushort)length, temp, 9);
+				_sendHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			} else {
+				byte[] temp = new byte[13];
+				BitConverterBE.WriteUInt64 (_sendSeq, temp, 0);
+				temp[8] = (byte)type;
+				BitConverterBE.WriteUInt16 ((ushort)_ver, temp, 9);
+				BitConverterBE.WriteUInt16 ((ushort)length, temp, 11);
+				_sendHMAC.TransformBlock (temp, 0, temp.Length, temp, 0);
+			}
 			_sendHMAC.TransformBlock (_sendBuffer, offset, length, _sendBuffer, offset);
-			_sendHMAC.TransformFinalBlock (new byte[0], 0, 0);
+			_sendHMAC.TransformFinalBlock (Utility.EmptyByteArray, 0, 0);
 			offset += length;
 			Buffer.BlockCopy (_sendHMAC.Hash, 0, _sendBuffer, offset, _sparams.MACLength);
 			Console.WriteLine ("Record MAC");
@@ -196,7 +219,10 @@ namespace openCrypto.TLS
 				encrypted += tmp;
 			}
 
-			_sendSeq ++;
+			if (type == ContentType.ChangeCipherSpec)
+				_sendSeq = 0;
+			else
+				_sendSeq ++;
 
 			return length;
 		}
@@ -245,12 +271,12 @@ namespace openCrypto.TLS
 				_recordType = RecordState.CipherText;
 		}
 
-		public void ComputeHandshakeHash ()
+		public void ComputeHandshakeHash (bool senderIsServer)
 		{
 			_sparams.PRF.HandshakeHashInitialize ();
 			for (int i = 0; i < _handshakePackets.Count; i++)
 				_sparams.PRF.HandshakeHashTransformBlock (_handshakePackets[i], 0, _handshakePackets[i].Length);
-			_sparams.PRF.HandshakeHashTransformFinished ();
+			_sparams.PRF.HandshakeHashTransformFinished (senderIsServer);
 		}
 
 		public ProtocolVersion ProtocolVersion {

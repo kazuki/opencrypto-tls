@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BAC9D571-017C-4903-B2B0-F86EE05B3CC4}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -68,17 +68,20 @@
     <Compile Include="Handshake\ServerHelloDone.cs" />
     <Compile Include="Handshake\ServerKeyExchange.cs" />
     <Compile Include="KeyExchangeAlgorithm.cs" />
+    <Compile Include="KeyExchange\DHE_DSS.cs" />
     <Compile Include="KeyExchange\ECDHE_ECDSA.cs" />
     <Compile Include="KeyExchange\IKeyExchangeAlgorithm.cs" />
     <Compile Include="NamedCurve.cs" />
     <Compile Include="PRF\IPRF.cs" />
     <Compile Include="PRF\MD5_AND_SHA1.cs" />
+    <Compile Include="PRF\SSL3_PRF.cs" />
     <Compile Include="ProtocolVersion.cs" />
     <Compile Include="RandomData.cs" />
     <Compile Include="RecordLayer.cs" />
     <Compile Include="SecurityParameters.cs" />
     <Compile Include="MACAlgorithm.cs" />
     <Compile Include="PRFAlgorithm.cs" />
+    <Compile Include="SSL3CompatibleHMAC.cs" />
     <Compile Include="SupportedCipherSuites.cs" />
     <Compile Include="TLSMessage.cs" />
     <Compile Include="TLSServerStream.cs" />

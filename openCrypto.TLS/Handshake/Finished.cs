@@ -6,16 +6,21 @@ namespace openCrypto.TLS.Handshake
 	{
 		byte[] _verifyData;
 
-		public Finished (byte[] verifyData) : base (HandshakeType.Finished)
+		public Finished (ProtocolVersion ver, byte[] verifyData) : base (HandshakeType.Finished)
 		{
-			if (verifyData.Length != 12)
+			if (ver == ProtocolVersion.SSL30 && verifyData.Length != 36)
+				throw new ArgumentException ();
+			if (ver != ProtocolVersion.SSL30 && verifyData.Length != 12)
 				throw new ArgumentException ();
 			_verifyData = verifyData;
 		}
 
-		public Finished (byte[] buffer, int offset, uint length) : base (HandshakeType.Finished)
+		public Finished (ProtocolVersion ver, byte[] buffer, int offset, uint length) : base (HandshakeType.Finished)
 		{
-			_verifyData = new byte[12];
+			if (ver == ProtocolVersion.SSL30)
+				_verifyData = new byte[36];
+			else
+				_verifyData = new byte[12];
 			Buffer.BlockCopy (buffer, offset, _verifyData, 0, _verifyData.Length);
 		}
 

@@ -6,7 +6,7 @@
 
 		void HandshakeHashInitialize ();
 		void HandshakeHashTransformBlock (byte[] buffer, int offset, int length);
-		void HandshakeHashTransformFinished ();
+		void HandshakeHashTransformFinished (bool senderIsServer);
 		byte[] GetHandshakeHash ();
 	}
 }
