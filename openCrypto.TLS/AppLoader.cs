@@ -50,9 +50,14 @@ namespace openCrypto.TLS
 					client = server.Accept ();
 					using (NetworkStream nstrm = new NetworkStream (client, FileAccess.ReadWrite, true))
 					using (TLSServerStream strm = new TLSServerStream (nstrm, true, certs, signAlgo, selector)) {
-						byte[] raw = new byte[256];
-						strm.Read (raw, 0, raw.Length);
-						Console.WriteLine (System.Text.Encoding.ASCII.GetString (raw));
+						byte[] raw = new byte[8192];
+						int recvLen = strm.Read (raw, 0, 4);
+						while (true) {
+							if (raw[recvLen - 4] == '\r' && raw[recvLen - 3] == '\n' && raw[recvLen - 2] == '\r' && raw[recvLen - 1] == '\n')
+								break;
+							raw[recvLen ++] = (byte)strm.ReadByte ();
+						}
+						Console.WriteLine (System.Text.Encoding.ASCII.GetString (raw, 0, recvLen - 2));
 						raw = System.Text.Encoding.UTF8.GetBytes ("HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n" +
 							"<html><body><h1>Hello ECC World !</h1><p>楕円曲線暗号の世界へようこそ！</p>" +
 							"<p>このメッセージはECDSA(secp256r1)によってサーバを検証後、<br />" +
