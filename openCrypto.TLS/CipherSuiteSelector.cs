@@ -1,28 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography.X509Certificates;
 
 namespace openCrypto.TLS
 {
 	public class CipherSuiteSelector
 	{
-		static CipherSuiteSelector _defaultInstance = null;
+		CipherSuite[] _supports;
 
-		protected CipherSuiteSelector ()
+		public CipherSuiteSelector (X509Certificate cert)
 		{
-		}
-
-		public static CipherSuiteSelector DefaultInstance {
-			get {
-				if (_defaultInstance == null)
-					_defaultInstance = new CipherSuiteSelector ();
-				return _defaultInstance;
+			KeyExchangeAlgorithm[] keyExchanges;
+			string algo_oid = cert.GetKeyAlgorithm ();
+			if (algo_oid == "1.2.840.10045.2.1") {
+				keyExchanges = new KeyExchangeAlgorithm[] {
+					KeyExchangeAlgorithm.DH_anon,
+					KeyExchangeAlgorithm.ECDH_anon,
+					KeyExchangeAlgorithm.ECDH_ECDSA,
+					KeyExchangeAlgorithm.ECDHE_ECDSA
+				};
+			} else if (algo_oid == "1.2.840.10040.4.1") {
+				keyExchanges = new KeyExchangeAlgorithm[] {
+					KeyExchangeAlgorithm.DH_anon,
+					KeyExchangeAlgorithm.DH_DSS,
+					KeyExchangeAlgorithm.DHE_DSS,
+					KeyExchangeAlgorithm.ECDH_anon
+				};
+			} else {
+				throw new NotSupportedException ();
 			}
+
+			_supports = SupportedCipherSuites.FilterKeyExchange (keyExchanges);
 		}
 
 		public virtual CipherSuite Select (CipherSuite[] suites)
 		{
-			CipherSuite[] supports = SupportedCipherSuites.SupportedSuites;
+			CipherSuite[] supports = _supports;
 			int minIdx = int.MaxValue;
 			for (int q = 0; q < suites.Length; q ++) {
 				for (int i = 0; i < supports.Length; i++) {

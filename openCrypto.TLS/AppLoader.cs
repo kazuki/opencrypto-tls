@@ -38,6 +38,7 @@ namespace openCrypto.TLS
 			signAlgo = dsa;
 #endif
 
+			CipherSuiteSelector selector = new CipherSuiteSelector (cert);
 			X509Certificate[] certs = new X509Certificate[] { cert };
 			Socket server = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			server.Bind (new IPEndPoint (IPAddress.Any, 443));
@@ -48,7 +49,7 @@ namespace openCrypto.TLS
 				try {
 					client = server.Accept ();
 					using (NetworkStream nstrm = new NetworkStream (client, FileAccess.ReadWrite, true))
-					using (TLSServerStream strm = new TLSServerStream (nstrm, true, certs, signAlgo)) {
+					using (TLSServerStream strm = new TLSServerStream (nstrm, true, certs, signAlgo, selector)) {
 						byte[] raw = new byte[256];
 						strm.Read (raw, 0, raw.Length);
 						Console.WriteLine (System.Text.Encoding.ASCII.GetString (raw));

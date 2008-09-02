@@ -9,7 +9,7 @@ namespace openCrypto.TLS
 	class TLSServerStream : Stream
 	{
 		RecordLayer _recordLayer;
-		CipherSuiteSelector _selector = CipherSuiteSelector.DefaultInstance;
+		CipherSuiteSelector _selector;
 		ConnectionStates _states;
 		SecurityParameters _sparams;
 		X509Certificate[] _certs;
@@ -17,13 +17,14 @@ namespace openCrypto.TLS
 		byte[] _readBuffer = new byte[RecordLayer.MaxFragmentSize];
 		int _readBufferOffset = 0, _readBufferSize = 0;
 
-		public TLSServerStream (Stream baseStream, bool owns_stream, X509Certificate[] certificates, AsymmetricAlgorithm signAlgo)
+		public TLSServerStream (Stream baseStream, bool owns_stream, X509Certificate[] certificates, AsymmetricAlgorithm signAlgo, CipherSuiteSelector selector)
 		{
 			_states = new ConnectionStates ();
 			_sparams = _states.SecurityParameters;
 			_recordLayer = new RecordLayer (baseStream, owns_stream, _sparams);
 			_certs = certificates;
 			_signAlgo = signAlgo;
+			_selector = selector;
 			ProcessHandshake ();
 		}
 
