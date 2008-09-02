@@ -263,7 +263,7 @@ namespace openCrypto.TLS
 		public byte[] ClientRandom {
 			get { return _client_random; }
 			internal set {
-				if (value.Length != 32)
+				if (value.Length != RandomData.Size)
 					throw new ArgumentException ();
 				_client_random = value;
 			}
