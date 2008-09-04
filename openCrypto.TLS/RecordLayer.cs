@@ -123,6 +123,7 @@ namespace openCrypto.TLS
 			Utility.Dump (_recvBuffer, 0, length);
 
 			int fragLen = length - _recvBuffer[length - 1] - _sparams.MACLength - 1;
+			if (fragLen < 0) throw new Exception (); // Decrypt Error
 			Console.WriteLine ("Fragment");
 			Utility.Dump (_recvBuffer, 0, fragLen);
 
