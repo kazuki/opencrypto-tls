@@ -33,7 +33,7 @@ namespace openCrypto.TLS.KeyExchange
 			byte[] encrypted = new byte[encryptedLength];
 			Buffer.BlockCopy (raw, offset, encrypted, 0, encryptedLength);
 			byte[] decrypted = _rsa.Decrypt (encrypted, false);
-			sparams.MasterSecret = sparams.MasterSecret = sparams.PRF.Compute (48, decrypted, "master secret", new byte[][] {sparams.ClientRandom, sparams.ServerRandom});
+			sparams.SetupMasterSecret (decrypted);
 		}
 	}
 }

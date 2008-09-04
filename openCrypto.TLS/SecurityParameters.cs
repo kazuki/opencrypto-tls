@@ -205,6 +205,11 @@ namespace openCrypto.TLS
 				return PRF.Compute (12, MasterSecret, isServer ? "server finished" : "client finished", new byte[][] {PRF.GetHandshakeHash ()});
 			}
 		}
+
+		public void SetupMasterSecret (byte[] premaster)
+		{
+			_master_secret = _prf.Compute (48, premaster, "master secret", new byte[][] {_client_random, _server_random});
+		}
 		#endregion
 
 		#region Properties
@@ -256,11 +261,6 @@ namespace openCrypto.TLS
 
 		public byte[] MasterSecret {
 			get { return _master_secret; }
-			internal set {
-				if (value.Length != 48)
-					throw new ArgumentException ();
-				_master_secret = value;
-			}
 		}
 
 		public byte[] ClientRandom {

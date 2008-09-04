@@ -71,7 +71,7 @@ namespace openCrypto.TLS.KeyExchange
 		{
 			ushort len = BitConverterBE.ReadUInt16AndMoveOffset (raw, ref offset);
 			byte[] premaster = _dh.PerformKeyAgreement (raw, offset, len);
-			sparams.MasterSecret = sparams.PRF.Compute (48, premaster, "master secret", new byte[][] { sparams.ClientRandom, sparams.ServerRandom });
+			sparams.SetupMasterSecret (premaster);
 		}
 	}
 }

@@ -65,7 +65,7 @@ namespace openCrypto.TLS.KeyExchange
 			byte[] pubKey = new byte[raw[offset]];
 			Buffer.BlockCopy (raw, offset + 1, pubKey, 0, pubKey.Length);
 			byte[] premaster = _ecdh.PerformKeyAgreement (pubKey, 48);
-			sparams.MasterSecret = sparams.PRF.Compute (48, premaster, "master secret", new byte[][] {sparams.ClientRandom, sparams.ServerRandom});
+			sparams.SetupMasterSecret (premaster);
 		}
 	}
 }
