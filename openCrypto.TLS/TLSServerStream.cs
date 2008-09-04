@@ -53,7 +53,7 @@ namespace openCrypto.TLS
 			for (int i = 0; i < count; i += RecordLayer.MaxFragmentSize) {
 				int size = (count - i > RecordLayer.MaxFragmentSize ? RecordLayer.MaxFragmentSize : count - i);
 				ApplicationData data = new ApplicationData (buffer, i, size);
-				_recordLayer.Write (ContentType.ApplicationData, data);
+				_recordLayer.Write (data);
 			}
 		}
 
@@ -72,12 +72,12 @@ namespace openCrypto.TLS
 			for (int i = 0; i < clientHello.CipherSuites.Length; i ++)
 				Console.WriteLine ("  {0}", clientHello.CipherSuites[i]);
 			CipherSuite selected = _selector.Select (clientHello.CipherSuites);
-			CipherSuiteInfo selectedInfo = SupportedCipherSuites.GetSuiteInfo (selected);
 			Console.WriteLine ("[TLSServer] CipherSuite Selected. {0}", selected);
 			if (selected == CipherSuite.NONE) {
 				// Alertを送るべき？
 				throw new Exception ();
 			}
+			CipherSuiteInfo selectedInfo = SupportedCipherSuites.GetSuiteInfo (selected);
 			_sparams.SetVersion (clientHello.Version);
 			_sparams.SetCipherSuite (selected, _signAlgo);
 			_sparams.ClientRandom = clientHello.Random;
@@ -121,7 +121,7 @@ namespace openCrypto.TLS
 			if (!Utility.Equals (finished.VerifyData, 0, verifyData, 0, verifyData.Length))
 				throw new Exception ();
 
-			_recordLayer.Write (ContentType.ChangeCipherSpec, new ChangeCipherSpec ());
+			_recordLayer.Write (ChangeCipherSpec.Instance);
 			_recordLayer.EnableSendCipher (_sparams.CreateServerEncryptor (), _sparams.CreateServerWriteHMAC ());
 			_recordLayer.ComputeHandshakeHash (true);
 			verifyData = _sparams.ComputeFinishedVerifyData (true);
@@ -137,7 +137,7 @@ namespace openCrypto.TLS
 		{
 			base.Close ();
 			if (_recordLayer != null) {
-				_recordLayer.Write (ContentType.Alert, new Alert (AlertLevel.Warning, AlertDescription.CloseNotify));
+				_recordLayer.Write (new Alert (AlertLevel.Warning, AlertDescription.CloseNotify));
 				_recordLayer.Close ();
 			}
 		}

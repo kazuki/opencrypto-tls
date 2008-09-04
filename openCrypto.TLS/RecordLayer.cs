@@ -83,7 +83,7 @@ namespace openCrypto.TLS
 					return new Alert ((AlertLevel)_recvBuffer[offset], (AlertDescription)_recvBuffer[offset + 1]);
 				case ContentType.ChangeCipherSpec:
 					_recvSeq = 0;
-					return new ChangeCipherSpec ();
+					return ChangeCipherSpec.Instance;
 				case ContentType.Handshake:
 					HandshakeType htype = (HandshakeType)_recvBuffer[offset];
 					uint hlength = BitConverterBE.ReadUInt24 (_recvBuffer, offset + 1);
@@ -156,7 +156,7 @@ namespace openCrypto.TLS
 			return ReadPlainText (type, ver, 0, (ushort)fragLen);
 		}
 
-		public void Write (ContentType type, TLSMessage msg)
+		void Write (ContentType type, TLSMessage msg)
 		{
 			Console.WriteLine ("[RecordLayer] {0} {1}", type, msg);
 			_sendBuffer[0] = (byte)type;
@@ -169,6 +169,22 @@ namespace openCrypto.TLS
 			BitConverterBE.WriteUInt16 (size, _sendBuffer, 3);
 			_strm.Write (_sendBuffer, 0, size + 5);
 			_strm.Flush ();
+		}
+
+		public void Write (ApplicationData msg)
+		{
+			Write (ContentType.ApplicationData, msg);
+		}
+
+		public void Write (Alert msg)
+		{
+			Write (ContentType.Alert, msg);
+		}
+
+		public void Write (ChangeCipherSpec msg)
+		{
+			Write (ContentType.ChangeCipherSpec, msg);
+			_sendSeq = 0;
 		}
 
 		public void Write (Handshake.HandshakeMessage msg)
@@ -220,10 +236,7 @@ namespace openCrypto.TLS
 				encrypted += tmp;
 			}
 
-			if (type == ContentType.ChangeCipherSpec)
-				_sendSeq = 0;
-			else
-				_sendSeq ++;
+			_sendSeq ++;
 
 			return length;
 		}
