@@ -15,6 +15,7 @@ namespace openCrypto.TLS
 		byte _mac_length;
 		byte _mac_key_length;
 		KeyExchangeAlgorithm _exchangeAlgo;
+		bool _isECC;
 
 		public CipherSuiteInfo (BulkCipherAlgorithm cipher, CipherType cipherType,
 			byte encKeyLen, byte blockLen, byte ivLen, byte recordIVLen, MACAlgorithm mac,
@@ -36,6 +37,11 @@ namespace openCrypto.TLS
 				case MACAlgorithm.HMAC_SHA512: _mac_length = _mac_key_length = 64; break;
 				default: throw new ArgumentOutOfRangeException ();
 			}
+			_isECC = exchangeAlgo == KeyExchangeAlgorithm.ECDH_anon ||
+				exchangeAlgo == KeyExchangeAlgorithm.ECDH_ECDSA ||
+				exchangeAlgo == KeyExchangeAlgorithm.ECDH_RSA ||
+				exchangeAlgo == KeyExchangeAlgorithm.ECDHE_ECDSA ||
+				exchangeAlgo == KeyExchangeAlgorithm.ECDHE_RSA;
 		}
 
 		public BulkCipherAlgorithm BulkCipherAlgorithm {
@@ -76,6 +82,10 @@ namespace openCrypto.TLS
 
 		public KeyExchangeAlgorithm KeyExchangeAlgorithm {
 			get { return _exchangeAlgo; }
+		}
+
+		public bool IsECC {
+			get { return _isECC; }
 		}
 	}
 }
