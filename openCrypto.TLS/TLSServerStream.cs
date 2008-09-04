@@ -86,7 +86,7 @@ namespace openCrypto.TLS
 			Extension[] serverExtensions = new Extension[] {new Extension (ExtensionType.EcPointFormats, new byte[] {1, 0})};
 			RandomData.CreateRandomData (serverRandom, 0);
 			_sparams.ServerRandom = serverRandom;
-			ServerHello serverHello = new ServerHello (clientHello.Version, serverRandom, Utility.EmptyByteArray, selected, CompressionMethod.Null, serverExtensions);
+			ServerHello serverHello = new ServerHello (clientHello.Version, serverRandom, RNG.GetRNGBytes (32), selected, CompressionMethod.Null, serverExtensions);
 			_recordLayer.Write (serverHello);
 
 			Certificate serverCert = new Certificate (_certs);
