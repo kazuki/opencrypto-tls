@@ -25,6 +25,16 @@ namespace openCrypto.TLS
 					KeyExchangeAlgorithm.DHE_DSS,
 					KeyExchangeAlgorithm.ECDH_anon
 				};
+			} else if (algo_oid == "1.2.840.113549.1.1.1") {
+				keyExchanges = new KeyExchangeAlgorithm[] {
+					KeyExchangeAlgorithm.DH_anon,
+					KeyExchangeAlgorithm.DH_RSA,
+					KeyExchangeAlgorithm.DHE_RSA,
+					KeyExchangeAlgorithm.ECDH_anon,
+					KeyExchangeAlgorithm.ECDH_RSA,
+					KeyExchangeAlgorithm.ECDHE_RSA,
+					KeyExchangeAlgorithm.RSA
+				};
 			} else {
 				throw new NotSupportedException ();
 			}

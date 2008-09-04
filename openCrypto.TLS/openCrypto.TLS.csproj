@@ -71,6 +71,7 @@
     <Compile Include="KeyExchange\DHE_DSS.cs" />
     <Compile Include="KeyExchange\ECDHE_ECDSA.cs" />
     <Compile Include="KeyExchange\IKeyExchangeAlgorithm.cs" />
+    <Compile Include="KeyExchange\RSA.cs" />
     <Compile Include="NamedCurve.cs" />
     <Compile Include="PRF\IPRF.cs" />
     <Compile Include="PRF\MD5_AND_SHA1.cs" />

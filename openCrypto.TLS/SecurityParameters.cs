@@ -90,6 +90,9 @@ namespace openCrypto.TLS
 				case KeyExchangeAlgorithm.DHE_DSS:
 					_keyExchanger = new DHE_DSS ((DSACryptoServiceProvider)signAlgo);
 					break;
+				case KeyExchangeAlgorithm.RSA:
+					_keyExchanger = new KeyExchange.RSA ((RSACryptoServiceProvider)signAlgo);
+					break;
 				default:
 					throw new NotImplementedException ();
 			}
