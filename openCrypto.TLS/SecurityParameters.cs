@@ -164,7 +164,10 @@ namespace openCrypto.TLS
 			if (_symmetricAlgo == null) {
 				switch (_bulk_cipher) {
 					case BulkCipherAlgorithm.AES:
-						_symmetricAlgo = new System.Security.Cryptography.RijndaelManaged ();
+						_symmetricAlgo = new RijndaelManaged ();
+						break;
+					case BulkCipherAlgorithm.Camellia:
+						_symmetricAlgo = new CamelliaManaged ();
 						break;
 					default:
 						throw new Exception ();

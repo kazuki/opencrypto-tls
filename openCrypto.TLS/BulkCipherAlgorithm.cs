@@ -9,6 +9,7 @@
 		TripleDES,
 		DES40,
 		IDEA,
-		AES
+		AES,
+		Camellia
 	}
 }
