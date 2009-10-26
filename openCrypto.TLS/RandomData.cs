@@ -13,7 +13,7 @@ namespace openCrypto.TLS
 			uint unixTime = (uint)((DateTime.UtcNow.Ticks - UnixTimeStart) / TimeSpan.TicksPerSecond);
 			BitConverterBE.WriteUInt32 (unixTime, buffer, offset);
 			lock (_randBuffer) {
-				RNG.Instance.GetBytes (_randBuffer);
+				RNG.GetBytes (_randBuffer);
 				Buffer.BlockCopy (_randBuffer, 0, buffer, offset + 4, _randBuffer.Length);
 			}
 		}
